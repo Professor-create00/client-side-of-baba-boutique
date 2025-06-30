@@ -1,0 +1,16 @@
+# Node.js backend
+/server/node_modules/
+server/.env
+
+# Vite React frontend
+/client/cloth-client/node_modules/
+client/cloth-client/dist/
+client/cloth-client/.env
+
+# Logs & system files
+*.log
+.DS_Store
+
+# IDE/editor folders
+.vscode/
+.idea/
