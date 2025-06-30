@@ -27,7 +27,9 @@ const productSchema = new mongoose.Schema({
   },
     expiresAt: {
     type: Date,
-    default: () => new Date(Date.now() + 1 * 60 * 1000), // 30 days from now
+default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+
+    
     index: { expires: 0 }, // TTL index triggers deletion when this date is reached
   },
 });

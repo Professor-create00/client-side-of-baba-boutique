@@ -1,11 +1,9 @@
 
-
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import desktopVideo from "./video1.mp4";
-import mobileVideo from "./mobilevideo.mp4";
+
 
 const HeroVideo = () => {
   const videoRef = useRef(null);
@@ -25,7 +23,8 @@ const HeroVideo = () => {
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
-      video.src = isMobile ? mobileVideo : desktopVideo;
+ 
+      video.src = isMobile ? "/videos/mobilevideo.mp4" : "/videos/video1.mp4";
       video.load();
 
       const playPromise = video.play();
@@ -47,7 +46,8 @@ const HeroVideo = () => {
           playsInline
           className={`w-full h-full object-cover ${isMobile ? 'object-top' : 'object-center'}`}
         >
-          <source src={isMobile ? mobileVideo : desktopVideo} type="video/mp4" />
+          <source src={isMobile ? "/videos/mobilevideo.mp4" : "/videos/video1.mp4"} type="video/mp4" />
+
           Your browser does not support the video tag.
         </video>
       </div>
@@ -169,7 +169,7 @@ const HomePage = () => {
 
         const fetched = {};
         for (const cat of categories) {
-          const res = await axios.get(`/api/products?category=${cat}`);
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products?category=${cat}`);
           fetched[cat] = res.data;
         }
         setProducts(fetched);
