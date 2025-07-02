@@ -20,9 +20,7 @@ router.get('/:id', getProductById);
 // @route   POST /api/products
 // @desc    Create new product with image
 // @access  Admin (in future with auth)
-router.post('/', upload.array('image'), createProduct);
-
-
+router.post('/', upload.array('images'), createProduct);
 import { deleteProduct } from '../controllers/productController.js';
 
 router.delete('/:id', deleteProduct);
@@ -30,7 +28,7 @@ router.delete('/:id', deleteProduct);
 
 import { updateProduct } from '../controllers/productController.js';
 
-router.put('/:id', upload.array('image'), updateProduct); 
+router.put('/:id', upload.array('images'), updateProduct); 
 
 
 export default router;

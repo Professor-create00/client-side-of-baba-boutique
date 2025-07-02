@@ -8,7 +8,6 @@ export const createOrder = async (req, res) => {
     if (!name || !phone || !address || !productName || !productId) {
       return res.status(400).json({ error: "All fields are required" });
     }
-
     const newOrder = new Order({
       name,
       phone,
@@ -29,7 +28,6 @@ export const createOrder = async (req, res) => {
       📦 Product: ${productName}
       🆔 Product ID: ${productId}
     `;
-
     await sendEmail("New Order Received", message);
 
     res.status(201).json({ message: "Order placed successfully", order: newOrder });

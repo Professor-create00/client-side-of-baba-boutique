@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
-
   if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
     const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, {
       expiresIn: "2h",
