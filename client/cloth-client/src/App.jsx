@@ -1,53 +1,36 @@
-import { Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-
-import ProductDetails from './pages/ProductDetails'; // adjust path if needed
-import CategoryPage from './pages/CategoryPage';
-import AdminDashboard from './pages/AdminDashboard';
-import AddProduct from './pages/AddProduct';
-import EditProduct from "./pages/EditProduct"; // at the top
-import PrivateRoute from './components/PrivateRoute';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import CategoryPage from "./pages/CategoryPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
+import AddProduct from "./pages/AddProduct";
+import EditProduct from "./pages/EditProduct";
+import ProductDetails from "./pages/ProductDetails";
 import AdminOrders from "./pages/AdminOrders";
-
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <Router>
+      <Navbar />
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
-    
+        <Route path="/saree" element={<CategoryPage category="saree" />} />
+        <Route path="/salwar-kurti" element={<CategoryPage category="salwar-kurti" />} />
+        <Route path="/night-dress" element={<CategoryPage category="night-dress" />} />
+        <Route path="/pickle" element={<CategoryPage category="pickle" />} />
+        <Route path="/organic-masalas" element={<CategoryPage category="organic-masalas" />} />
         <Route path="/product/:id" element={<ProductDetails />} />
-        <Route path="/:category" element={<CategoryPage />} />
-     
-        <Route path="/admin" element={
-          <PrivateRoute>
-            <AdminDashboard />
-          </PrivateRoute>
-          } />
-             <Route path="/admin/orders" element={
-          <PrivateRoute>
-                <AdminOrders />
-          </PrivateRoute>
-      } />
-        <Route path="/admin/add" element={
-          <PrivateRoute>
 
-            <AddProduct />
-          </PrivateRoute>
-          } />
-        <Route path="/admin/edit/:id" element={
-          <PrivateRoute>
-
-            <EditProduct />
-          </PrivateRoute>
-          } />
-        
-
-<Route path="/admin-login" element={<AdminLogin />} />
-
+        {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/add-product" element={<AddProduct />} />
+        <Route path="/admin/edit-product/:id" element={<EditProduct />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
       </Routes>
-    </div>
+    </Router>
   );
 }
 
