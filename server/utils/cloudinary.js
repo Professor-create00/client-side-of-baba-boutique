@@ -2,8 +2,8 @@
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
-  cloud_name: "dhqpbvftp",
-  api_key: "172482563471112",
-  api_secret: "aRLTW7Jlq3bkf0wfJZs1Qd5Z5QA",
+  cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:process.env.CLOUDINARY_API_KEY,
+  api_secret:process.env.CLOUDINARY_API_SECRET,
 });
 export default cloudinary;

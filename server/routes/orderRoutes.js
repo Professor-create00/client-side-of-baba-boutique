@@ -7,7 +7,6 @@ import {
 } from "../controllers/orderController.js";
 
 const router = express.Router();
-
 router.post("/", placeOrder);
 router.get("/", getAllOrders);
 router.get("/:id", getOrderById);
