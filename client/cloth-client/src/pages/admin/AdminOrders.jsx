@@ -28,7 +28,7 @@ const AdminOrders = () => {
   const handleDelete = async (orderId) => {
     setIsDeleting(orderId);
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/products/orders/${orderId}`);
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/orders/${orderId}`);
       setOrders(orders.filter((o) => o._id !== orderId));
       showNotification("Order deleted successfully", "success");
     } catch (err) {
