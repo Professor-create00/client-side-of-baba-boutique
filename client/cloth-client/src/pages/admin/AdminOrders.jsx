@@ -59,7 +59,7 @@ const AdminOrders = () => {
       
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <FiPackage className="text-gray-600" /> Order Management
+          <FiPackage className="text-black" /> Order Management
         </h1>
       </div>
 
