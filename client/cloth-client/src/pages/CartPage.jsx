@@ -6,9 +6,6 @@ import axios from "axios";
 import { FiTrash2, FiPlus, FiMinus, FiShoppingCart } from "react-icons/fi";
 
 const CartPage = () => {
-  
-
-
 const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [showForm, setShowForm] = useState(false);
