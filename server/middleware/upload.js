@@ -1,23 +1,26 @@
-
-
-
 // middleware/upload.js
 import multer from "multer";
-import path from "path";
-import { fileURLToPath } from "url";
-import fs from "fs";
-// ESM-compatible __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-// Ensure upload folder exists
-const uploadDir = path.join(__dirname, "../uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
-// Using memory storage for Cloudinary uploads
+// Memory storage for direct Cloudinary upload
 const storage = multer.memoryStorage();
 
-// ✅ Define and export the configured multer instance
-const upload = multer({ storage });
+// Multer config
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max per file
+  },
+  fileFilter: (req, file, cb) => {
+    if (
+      file.mimetype === "image/jpeg" ||
+      file.mimetype === "image/png" ||
+      file.mimetype === "image/webp"
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only JPG, PNG, and WEBP images are allowed"), false);
+    }
+  },
+});
+
 export default upload;

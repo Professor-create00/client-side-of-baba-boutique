@@ -1,127 +1,165 @@
-import Product from "../models/product.js";
 import cloudinary from "../utils/cloudinary.js";
-import streamifier from 'streamifier';
+import Product from "../models/productModel.js";
+import mongoose from "mongoose";
+import uploadToCloudinary from "../utils/uploadToCloudinary.js";
+
+// Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    const { category, search, maxPrice } = req.query;
-
-    let filter = {};
-
-    if (category) {
-      filter.category = category;
-    }
-
-    if (search) {
-      filter.name = { $regex: search, $options: "i" }; 
-    }
-
-    if (maxPrice) {
-      filter.price = { $lte: Number(maxPrice) };
-    }
-
-    const products = await Product.find(filter);
+    const products = await Product.find({});
     res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to fetch products",
-      error: error.message,
-    });
+    console.error("❌ Error fetching products:", error);
+    res.status(500).json({ message: "Server Error" });
   }
-};
-
-
-const streamUpload = (buffer) => {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: "clothes" },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
-      }
-    );
-    streamifier.createReadStream(buffer).pipe(stream);
-  });
 };
 
 export const createProduct = async (req, res) => {
   try {
-    const { name, size, price, category ,material } = req.body; // newly added material
+    
 
-    // Upload all images in parallel
-    const imageUploads = await Promise.all(
-      req.files.map(file => streamUpload(file.buffer))
-    );
+    const { name, price, description, size, category } = req.body;
 
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "No images uploaded" });
+    }
+
+    const imageUrls = [];
+    for (let file of req.files) {
+
+      const result = await uploadToCloudinary(file.buffer);
+     
+      if (!result || !result.secure_url) {
+        continue;
+      }
+      imageUrls.push(result.secure_url);
+    }
     const product = new Product({
       name,
-      size,
       price,
+      description,
+      size,
       category,
-     // newly added 
-     material,
-      image: imageUploads, // This will be an array of URLs
+      images: imageUrls,
     });
 
     await product.save();
+    console.log("📦 Product saved:", product);
+
     res.status(201).json(product);
-  } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ message: "Failed to add product", error: error.message });
+  } catch (err) {
+    console.error("❌ Error:", err);
+    res.status(500).json({ message: "Server Error", error: err.message });
   }
 };
 
-export const getProductById = async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  if (!product) return res.status(404).json({ message: "Product not found" });
-  res.json(product);
-};
 
-export const deleteProduct = async (req, res) => {
+
+
+// GET /api/products/:id - Fetch single product by ID
+export const getProductById = async (req, res) => {
   try {
-    const deleted = await Product.findByIdAndDelete(req.params.id);
-    if (!deleted) {
+    const { id } = req.params;
+
+    // ✅ Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Product ID" });
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    res.status(200).json({ message: "Product deleted successfully" });
+    res.status(200).json(product);
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete product", error: error.message });
+    console.error("❌ Error fetching product by ID:", error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
+
+// GET /api/products/category/:category - Fetch products by category
+export const getProductsByCategory = async (req, res) => {
+  try {
+    const category = req.params.category;
+
+    // Ensure category matches one of the enum values
+    const allowedCategories = ["Sarees", "Salwar Kurti", "Pickle", "Nighty", "Masalas"];
+    if (!allowedCategories.includes(category)) {
+      return res.status(400).json({ message: "Invalid category" });
+    }
+
+    const products = await Product.find({ category });
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("❌ Error fetching products by category:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 
 export const updateProduct = async (req, res) => {
   try {
-    const { name, price, size,category,material } = req.body; 
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    const { id } = req.params;
 
-    let newImages = [];
-    if (req.files && req.files.length > 0) {
-      newImages = await Promise.all(
-        req.files.map(file => {
-          return new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-              { folder: "clothes" },
-              (err, result) => {
-                if (err) reject(err);
-                else resolve(result.secure_url);
-              }
-            );
-            streamifier.createReadStream(file.buffer).pipe(stream);
-          });
-        })
-      );
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Product ID" });
     }
 
-    const updatedImages = [...(product.image || []), ...newImages];
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const { name, price, description, size, category } = req.body;
+
+    // Upload new images if provided
+    let imageUrls = product.images; // keep existing images if no new ones
+    if (req.files && req.files.length > 0) {
+      imageUrls = []; // replace with new images
+      for (const file of req.files) {
+        const uploadResponse = await uploadToCloudinary(file.buffer);
+
+        // ✅ Only push the secure_url
+        imageUrls.push(uploadResponse.secure_url);
+      }
+    }
+
     product.name = name || product.name;
     product.price = price || product.price;
+    product.description = description || product.description;
     product.size = size || product.size;
-    product.material = material || product.material; 
     product.category = category || product.category;
-    product.image = updatedImages;
-    await product.save();
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({ message: "Update failed", error: err.message });
+    product.images = imageUrls;
+
+    const updatedProduct = await product.save();
+    res.status(200).json(updatedProduct);
+  } catch (error) {
+    console.error("Update Product Error:", error);
+    res.status(500).json({ message: "Update failed", error: error.message });
+  }
+};
+
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Delete images from Cloudinary
+    for (const imageUrl of product.images) {
+      const publicId = imageUrl.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(`cloth-app/${publicId}`);
+    }
+
+    // Delete product from DB
+    await product.deleteOne();
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Delete Product Error:", error);
+    res.status(500).json({ message: "Failed to delete product", error: error.message });
   }
 };
