@@ -67,7 +67,7 @@ const EditProduct = () => {
     }
 
     try {
-      await axios.put(`http://localhost:5000/api/products/${id}`, formData, {
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/products/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       showNotification("Product updated successfully", "success");
