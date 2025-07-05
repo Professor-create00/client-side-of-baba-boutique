@@ -10,7 +10,7 @@ const AdminOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products/orders`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/orders`);
         setOrders(res.data);
       } catch (err) {
         showNotification("Failed to fetch orders", "error");
